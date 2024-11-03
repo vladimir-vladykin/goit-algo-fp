@@ -10,7 +10,11 @@ def main():
     }
 
     total_calories, money_spent, choosen_products = greedy_algorithm(budget, food_items)
-    print(f"Greede result, total_calories: {total_calories}, money spent: {money_spent}, products are:\n{choosen_products}")
+    print(f"Greede result, total calories: {total_calories}, money spent: {money_spent}, products are:\n{choosen_products}")
+    print("\n")
+
+    total_calories, money_spent, choosen_products = dynamic_programming(budget, food_items)
+    print(f"Dynamic result, total calories: {total_calories}, money spent: {money_spent}, products are:\n{choosen_products}")
 
 
 def greedy_algorithm(budget, items):
@@ -38,6 +42,7 @@ def greedy_algorithm(budget, items):
     total_budget = budget - budget_left
     return total_calories, total_budget, result
 
+
 # pop from dict item with max calories
 def pop_best_available_item(budget_left, items: dict):
     if not items:
@@ -62,8 +67,47 @@ def pop_best_available_item(budget_left, items: dict):
 
 
 
-def dynamic_programming(items):
-    pass
+def dynamic_programming(budget, food_items: dict):
+    costs = []
+    calories = []
+    for item in food_items.items():
+        cost = item[1]["cost"]
+        value = item[1]["calories"]
+        costs.append(cost)
+        calories.append(value)
+
+    n = len(calories)
+
+    # setup DP table
+    dp_table = [[0 for w in range(budget + 1)] for i in range(n + 1)]
+
+    # build DP table down-up
+    for i in range(n + 1):
+        for sub_budget in range(budget + 1):
+            if i == 0 or sub_budget == 0:
+                dp_table[i][sub_budget] = 0
+            elif costs[i - 1] <= sub_budget:
+                dp_table[i][sub_budget] = max(calories[i - 1] + dp_table[i - 1][sub_budget - costs[i - 1]], dp_table[i - 1][sub_budget])
+            else:
+                dp_table[i][sub_budget] = dp_table[i - 1][sub_budget]
+
+    # the best amount of calories
+    total_calories = dp_table[n][budget]
+
+
+    # figure out what product was used
+    calories_left = total_calories
+    budget_left = budget
+    result = []
+    while calories_left > 0:
+        next_item = pop_best_available_item(budget_left, food_items)
+        if next_item is not None:
+            result.append(next_item[0])
+            calories_left -= next_item[1]["calories"]
+            budget_left -= next_item[1]["cost"]
+
+    total_budget = budget - budget_left
+    return total_calories, total_budget, result
 
 
 if __name__ == "__main__":
