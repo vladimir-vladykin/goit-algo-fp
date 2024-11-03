@@ -11,6 +11,7 @@ Algo homework final
 
 ## Results of Monte-Card experiment for dice
 Runs of experiments:
+
     Result for 100 numbers of test:
     2: 2.00%
     3: 3.00%
